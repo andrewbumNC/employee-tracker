@@ -13,10 +13,10 @@ create table department (
 
 create table role_type ( 
     id int not null auto_increment primary key,
-    title varchar(30) not null,
+    roleName varchar(30) not null,
     salary decimal not null,
-    department_id int not null,
-    foreign key (department_id)
+    roleDepartment int not null,
+    foreign key (roleDepartment)
     references department(id)
     on delete cascade
     );

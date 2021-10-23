@@ -3,6 +3,7 @@ const mysql = require('mysql2');
 const Employee = require("./lib/employee");
 const Department = require("./lib/department");
 const Role = require("./lib/role");
+const cTable = require('console.table');
 
 const db = mysql.createConnection( 
     {
@@ -99,10 +100,10 @@ const addRole = () => {
     .then((addRoleAnswers) => {
 
         const {roleName, salary, roleDepartment} = addRoleAnswers;
-        const roleClass = new Role(roleName, salary, roleDepartment);
+        // const roleClass = new Role(roleName, salary, roleDepartment);
         
-        
-        addToRoleTable(roleClass)
+       
+        addToRoleTable(roleName, salary, roleDepartment)
 
     })
 }
@@ -118,7 +119,10 @@ const addDepartment = () => {
 ])
 .then((addDepartmentAnswer) => {
 
+
+
     const {departmentName} = addDepartmentAnswer;
+    
     const departmentClass = new Department(departmentName);
 
     
@@ -138,23 +142,23 @@ db.query(sql, departmentClass.getDepartment(), (err, results) => {
 } )
 }
 
-const addToRoleTable = (roleClass) => {
-   console.log(roleClass.getAllRole())
+const addToRoleTable = (roleName, salary, roleDepartment) => {
+  
 
-   
+//    const {roleName, salary, roleDepartment} = roleClass;
+   console.log(roleName)
+   console.log(salary)
+   console.log(roleDepartment)
+   const roleUpdates = [roleName, salary, roleDepartment,]
 
-//    const sql = `INSERT INTO role_type (title, salary, department_id)
-//             VALUES (?)`;
-//             db.query(sql, roleClass, (err, results) => {
-//                 if (err) {
-//                     console.error(err.message)
-//                 }
-//                console.log('success!')
-//             } );
-            
-        
-    
-
+   const sql = `insert into role_type (roleName, salary, roleDepartment)
+   values (?)`;
+            db.query(sql, roleUpdates, (err, results) => {
+                if (err) {
+                    console.error(err.message)
+                }
+               console.log('success!')
+            } );
 }
 
 
@@ -163,8 +167,22 @@ const addToRoleTable = (roleClass) => {
 const viewEmployees = () => {
 }
 const viewDepartments = () => {
+    const sql =  `SELECT * FROM department`;
+    db.query(sql, (err, results) => {
+        if(err){
+            console.log(err)
+        }
+        console.table(results)
+    })
+
 }
 const viewRoles = () => {
+
+   // WHEN I choose to view all roles
+//THEN I am presented with the job title, role id, the department that role belongs to, and the salary for that role
+
+
+
 }
 
 

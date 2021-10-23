@@ -6,7 +6,7 @@ insert into department (department_name)
             ("engineering");
 
 
-    insert into role_type (title, salary, department_id)
+    insert into role_type (roleName, salary, roleDepartment)
     values  ("intern", 10000, 3),
             ("account executive", 130000, 3),
             ("developer", 80000, 5),
