@@ -92,7 +92,7 @@ const addEmployee = () => {
             },
         ])
         .then((addEmployeeAnswers) => {
-            
+
             const {
                 firstName,
                 lastName,
@@ -108,13 +108,13 @@ const addToEmployeeTable = (firstName, lastName, manager, roleid) => {
 
     const sql = `INSERT INTO employee (first_name, last_name, manager_name, role_id)
             VALUES (?, ?, ?, ?)`;
-            db.query(sql, [firstName, lastName, manager, roleid], (err, result) => {
-    
-    if (err) {
-        console.log(err)
-    }
-    console.log('success!')
-})
+    db.query(sql, [firstName, lastName, manager, roleid], (err, result) => {
+
+        if (err) {
+            console.log(err)
+        }
+        console.log('success!')
+    })
 }
 
 
@@ -129,6 +129,7 @@ const viewRoles = () => {
             console.log(err)
         }
         console.table(results)
+        return results
     })
 }
 
@@ -220,79 +221,81 @@ const addToDeparmentTable = (departmentName) => {
     })
 }
 
-
-
-
-
-
-
-
-
-
-
 function updateEmployee() {
-    const sql = `SELECT employee.id AS employee_ID, employee.first_name, employee.last_name, role_type.roleName AS title, role_type.salary, employee.manager_name
+    
+
+    const sqlEmployee = `SELECT employee.id AS employee_ID, employee.first_name, employee.last_name, role_type.roleName AS title, role_type.salary, employee.manager_name
 FROM employee
 JOIN role_type ON employee.role_id = role_type.id;`
 
+    const sqlRole = `SELECT role_type.id AS role_ID, role_type.roleName AS Title, role_type.id as Role_ID, role_type.salary, department.department_name
+FROM role_type 
+JOIN department ON role_type.roleDepartment = department.id`;
+
+
     //list choices like at the top of all the names, do it by pulling database, storing as array in variable. 
     //Once choosen give them an option of role types, same way as above, then IF they choose one role type, update the role ID on the employee. 
-    db.query(sql, (err, results) => {
+    db.query(sqlEmployee, (err, results) => {
         if (err) {
             console.log(err)
         }
-        const firstNameArray = [];
-        const lastNameArray = [];
-        for (i = 0; i < results.length; i++) {
-            firstNameArray.push(results[i].first_name, results[i].last_name); 
-        }
-        
-        const firstAndLast = Array.from({length:firstNameArray.length/2}, (_,i)=>firstNameArray[2*i]+firstNameArray[2*i+1]);
-        
-let namesWSpaces = [];
+        const nameArray = [];
 
-        for (i = 0; i < firstAndLast.length; i++){
-           namesWSpaces.push(firstAndLast[i].replace(/([A-Z])/g, ' $1').trim())
+        for (i = 0; i < results.length; i++) {
+            nameArray.push({
+                name: `${results[i].first_name} ${results[i].last_name}`,
+                value: results[i].employee_ID,
+            });
         }
-        employeeChoices(namesWSpaces)
+
+ 
+
+
+        const roleNames = [];
+        db.query(sqlRole, (err, results) => {
+            if (err) {
+                console.log(err)
+            }
+            console.log(results)
+
+            for (i = 0; i < results.length; i++) {
+                roleNames.push({
+                    name: results[i].Title,
+                    value: results[i].role_ID,
+                })
+            }
+            employeeChoices(nameArray, roleNames)
+        })
     })
 }
 
-
-
-
-const employeeChoices = (namesWSpaces) => {
+const employeeChoices = (namesWSpaces, roleNames) => {
     inquirer
         .prompt([{
-            type: 'list',
-            message: 'Which employee do you want to update?',
-            name: 'employeeChoice',
-            choices: namesWSpaces
-        },
-        
-
-    ])
-        .then((employeeToUpdate) => { 
-           
+                type: 'list',
+                message: 'Which employee do you want to update?',
+                name: 'employeeChoice',
+                choices: namesWSpaces
+            },
+            {
+                type: 'list',
+                message: 'Which role are you switching your employee to?',
+                name: 'roleChoice',
+                choices: roleNames
+            }
+        ])
+        .then((employeeToUpdate) => {
             const {
-                employeeChoice
+                employeeChoice,
+                roleChoice
             } = employeeToUpdate;
 
-            console.log(employeeChoice)
-            let nameSplit = employeeChoice.split(' ')
-            console.log(nameSplit)
+            console.log(employeeToUpdate)
 
-            updateEmployeeRole()
+            
 
-
-        }
-        )}
-
-        const updateEmployeeRole
-
-
-
-
+        })
+}
 
 
 whatToDo()
