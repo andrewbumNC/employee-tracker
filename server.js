@@ -292,7 +292,15 @@ const employeeChoices = (namesWSpaces, roleNames) => {
 
             console.log(employeeToUpdate)
 
-            
+            const sql = `UPDATE employee SET role_id = ? WHERE id  = ?`
+
+            db.query(sql, [roleChoice, employeeChoice], (err, results) => {
+                if(err) {
+                    console.log(err)
+                } else {
+                    console.log(results)
+                }
+            })
 
         })
 }
