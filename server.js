@@ -1,22 +1,7 @@
 const inquirer = require("inquirer");
-const mysql = require('mysql2');
-const Employee = require("./lib/employee");
-const Department = require("./lib/department");
-const Role = require("./lib/role");
-const cTable = require('console.table');
-
-
-const db = mysql.createConnection({
-
-        host: 'localhost',
-        user: 'root',
-        password: '12345678',
-        database: 'employee_db'
-    },
-
-    console.log('Connected to the employee_db database.')
-)
-
+const mysql = require("mysql2");
+const cTable = require("console.table");
+const db = require("./connection/connection")
 
 const whatToDo = () => {
     inquirer
@@ -24,12 +9,12 @@ const whatToDo = () => {
             type: 'list',
             message: 'What would you like to do?',
             name: 'whatToDo',
-            choices: ['View All Employees', 'Add Employee', 'View All Roles', 'Add Role', 'View All Departments', 'Add Department', 'Update Employee']
+            choices: ['View All Employees', 'Add Employee', 'View All Roles', 'Add Role', 'View All Departments', 'Add Department', 'Update Employee', 'Quit']
 
         }])
         .then((pathChoosen) => {
             const userPath = pathChoosen.whatToDo
-            const userOptions = ['View All Employees', 'Add Employee', 'View All Roles', 'Add Role', 'View All Departments', 'Add Department', 'Update Employee']
+            const userOptions = ['View All Employees', 'Add Employee', 'View All Roles', 'Add Role', 'View All Departments', 'Add Department', 'Update Employee', 'Quit']
 
             if (userPath === userOptions[0]) {
                 viewEmployees()
@@ -43,8 +28,10 @@ const whatToDo = () => {
                 viewDepartments()
             } else if (userPath === userOptions[5]) {
                 addDepartment()
-            } else {
+            } else if (userPath === userOptions[6]){
                 updateEmployee()
+            } else {
+                return
             }
         })
 }
@@ -53,9 +40,7 @@ const whatToDo = () => {
 
 //view
 const viewEmployees = () => {
-    //WHEN I choose to view all employees
-    //THEN I am presented with a formatted table showing employee data, including employee  
-    // job titles, departments, salaries, 
+    
     const sql = `SELECT employee.id AS employee_ID, employee.first_name, employee.last_name, role_type.roleName AS title, role_type.salary, employee.manager_name
 FROM employee
 JOIN role_type ON employee.role_id = role_type.id;`
@@ -64,6 +49,7 @@ JOIN role_type ON employee.role_id = role_type.id;`
             console.log(err)
         }
         console.table(results)
+        whatToDo()
     })
 }
 
@@ -114,6 +100,7 @@ const addToEmployeeTable = (firstName, lastName, manager, roleid) => {
             console.log(err)
         }
         console.log('success!')
+        whatToDo()
     })
 }
 
@@ -129,12 +116,11 @@ const viewRoles = () => {
             console.log(err)
         }
         console.table(results)
-        return results
+        whatToDo()
     })
 }
 
 const addRole = () => {
-    //name, salary, and department
     inquirer
         .prompt([{
                 type: "input",
@@ -175,6 +161,7 @@ const addToRoleTable = (roleName, salary, roleDepartment) => {
             console.error(err.message)
         }
         console.log('success!')
+        whatToDo()
     });
 }
 
@@ -182,6 +169,7 @@ const addToRoleTable = (roleName, salary, roleDepartment) => {
 
 //------------------- VIEW and ADD DEPARTMENT  ------------------------------
 
+//VIEW
 const viewDepartments = () => {
     const sql = `SELECT * FROM department`;
     db.query(sql, (err, results) => {
@@ -189,9 +177,11 @@ const viewDepartments = () => {
             console.log(err)
         }
         console.table(results)
+        whatToDo()
     })
 }
 
+//ADD
 const addDepartment = () => {
     inquirer
         .prompt([{
@@ -218,12 +208,15 @@ const addToDeparmentTable = (departmentName) => {
             console.error(err.message)
         }
         console.log('success!')
+        whatToDo()
     })
 }
 
-function updateEmployee() {
-    
 
+// ------------------------------UPDATE EMPLOYEE ----------------------------------
+function updateEmployee() {
+
+//pull current employee and role list
     const sqlEmployee = `SELECT employee.id AS employee_ID, employee.first_name, employee.last_name, role_type.roleName AS title, role_type.salary, employee.manager_name
 FROM employee
 JOIN role_type ON employee.role_id = role_type.id;`
@@ -233,8 +226,7 @@ FROM role_type
 JOIN department ON role_type.roleDepartment = department.id`;
 
 
-    //list choices like at the top of all the names, do it by pulling database, storing as array in variable. 
-    //Once choosen give them an option of role types, same way as above, then IF they choose one role type, update the role ID on the employee. 
+     
     db.query(sqlEmployee, (err, results) => {
         if (err) {
             console.log(err)
@@ -247,9 +239,6 @@ JOIN department ON role_type.roleDepartment = department.id`;
                 value: results[i].employee_ID,
             });
         }
-
- 
-
 
         const roleNames = [];
         db.query(sqlRole, (err, results) => {
@@ -292,16 +281,16 @@ const employeeChoices = (namesWSpaces, roleNames) => {
 
             console.log(employeeToUpdate)
 
-            const sql = `UPDATE employee SET role_id = ? WHERE id  = ?`
+            const sql = `UPDATE employee SET role_id = ? WHERE id = ?`
 
             db.query(sql, [roleChoice, employeeChoice], (err, results) => {
-                if(err) {
+                if (err) {
                     console.log(err)
                 } else {
                     console.log(results)
+                    whatToDo()
                 }
             })
-
         })
 }
 
