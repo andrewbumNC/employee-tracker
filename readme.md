@@ -32,3 +32,8 @@ THEN you are prompted to select an employee to update and their new role and thi
 
 # Video
 
+https://watch.screencastify.com/v/ceCCYU0eU1ef6Do7fHUO
+
+# GitHub
+
+https://github.com/andrewbumNC/employee-tracker
